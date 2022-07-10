@@ -1,0 +1,74 @@
+version: '3.9'
+
+# maintainer: naphal@naphal.net
+# Homelab Base File
+# Setup base services that should always be running
+
+volumes:
+  postgres-volume:
+
+networks:
+  nginx-network:
+  database-network:
+  guacd-backend-network:
+  guac-network:
+
+
+secrets:
+  postgres-db-passwd:
+    file: ./secrets/postgres-db-passwd.txt
+
+  guac-db-passwd:
+    file: ./secrets/guac-db-passwd.txt
+
+
+services:
+  postgres-db:
+    hostname: postgres
+    image: postgres:13.4-buster
+    env_file:
+      - secrets/db.env
+    secrets:
+      - postgres-db-passwd
+      - guac-db-passwd
+    networks:
+      - database-network
+    volumes:
+      - postgres-volume:/var/lib/postgresql
+      - ./configs/postgresql/:/docker-entrypoint-initdb.d/
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  guacd-backend:
+    hostname: guacd
+    image: guacamole/guacd
+    networks:
+      - guacd-backend-network
+    restart: always
+
+  guacamole-frontend:
+    hostname: guacamole
+    image: guacamole/guacamole
+    env_file:
+      - secrets/guac.env
+    secrets:
+      - guac-db-passwd
+    networks:
+      - guac-network
+      - guacd-backend-network
+      - database-network
+    restart: always
+    ports:
+      - "8080:8080"
+
+
+
+
+
+
+
+
