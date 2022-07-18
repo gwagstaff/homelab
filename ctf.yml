@@ -1,0 +1,33 @@
+version: '3.9'
+
+# maintainer: naphal@naphal.net
+# kali + other ctf services
+# usage: docker compose -f docker-compose.yml -f infra/ctf-docker-compose.yml [DOCKERCMD]
+
+services:
+  kali-ctf:
+    image: naphal45/kali-docker:latest
+    env_file:
+      - secrets/kali.env
+    secrets:
+      - kali-vnc-passwd
+    entrypoint: /entrypoint.sh
+    ports:
+      - "5900:5900"
+    user: kali
+    volumes:
+      - ./configs/ctf-kali/env:/etc/zsh/zshrc.d/100-env:ro
+      - ./configs/ctf-kali/zshrc:/etc/zsh/zshrc.d/800-zshrc:ro
+      - ./configs/ctf-kali/alias:/etc/zsh/zshrc.d/900-alias:ro
+      - ./configs/ctf-kali/files.txt:/home/kali/.config/files.txt:ro
+      - ./configs/ctf-kali/commands.txt:/home/kali/.config/commands.txt:ro
+      - ./configs/ctf-kali/repos.txt:/home/kali/.config/repos.txt:ro
+      - ./configs/ctf-kali/userstartup.sh:/etc/zsh/zshrc.d/999-startup:ro # last thing that will be executed
+    tty: true
+    stdin_open: true
+    privileged: true
+    hostname: kali-ctf
+    networks:
+      - guacd-backend-network
+    environment:
+      - DISPLAY
