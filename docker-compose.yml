@@ -21,6 +21,9 @@ secrets:
   guac-db-passwd:
     file: ./secrets/guac-db-passwd.txt
 
+  kali-vnc-passwd:
+    file: ./secrets/kali-vnc-passwd.txt
+
 
 services:
   postgres-db:
@@ -34,7 +37,7 @@ services:
     networks:
       - database-network
     volumes:
-      - postgres-volume:/var/lib/postgresql
+      - postgres-volume:/var/lib/postgresql/data
       - ./configs/postgresql/:/docker-entrypoint-initdb.d/
     restart: always
     healthcheck:
